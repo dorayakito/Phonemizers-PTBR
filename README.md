@@ -1,3 +1,5 @@
+# W I P
+> Alguns phonemizers estão passando por ajustes. Você é livre para dar commit.
 # Phonemizers, C#, OpenUtau e demais informações técnicas
 Repositório público de Phonemizers feitos por Xiao Pingguo.
 
