@@ -4,16 +4,16 @@ using System.Linq;
 using OpenUtau.Api;
 
 namespace OpenUtau.Plugins {
-    [Phonemizer("Portuguese CATIPA DiffSinger Phonemizer", "DIFF CATIPA", "xiao")]
+    [Phonemizer("Portuguese CATIPA DiffSinger Phonemizer", "DIFF CATIPA", "xiao", language:"PT")]
     public class CatipaDiffSingerPhonemizer : Phonemizer {
-        private readonly string[] vowels = { "a", "e", "i", "o", "u", "a'", "e'", "i'", "o'", "u'", "a~", "e~", "i~", "o~", "u~" };
+        private readonly string[] vowels = { "a", "e", "i", "o", "u", "aa", "ee", "ii", "oo", "uu", "A", "E", "I", "O", "U" };
         private readonly string[] consonants = { "b", "d", "dj", "f", "g", "h", "j", "k", "l", "lh", "m", "n", "nh", "p", "r", "rr", "rrr", "wr", "s", "t", "tch", "v", "w", "x", "y", "z" };
 
         private readonly Dictionary<string, string> g2p = new Dictionary<string, string> {
-            { "a", "a" }, { "á", "a" }, { "à", "a" }, { "ã", "a~" }, { "â", "a'" },
-            { "e", "e" }, { "é", "e'" }, { "ê", "e" },
+            { "a", "a" }, { "á", "a" }, { "à", "a" }, { "ã", "A" }, { "â", "aa" },
+            { "e", "e" }, { "é", "ee" }, { "ê", "e" },
             { "i", "i" }, { "í", "i" },
-            { "o", "o" }, { "ó", "o'" }, { "ô", "o" }, { "õ", "o~" },
+            { "o", "o" }, { "ó", "oo" }, { "ô", "o" }, { "õ", "O" },
             { "u", "u" }, { "ú", "u" },
 
             { "ba", "b a" }, { "be", "b e" }, { "bi", "b i" }, { "bo", "b o" }, { "bu", "b u" },
