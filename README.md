@@ -3,8 +3,6 @@
 # Phonemizers, C#, OpenUtau e demais informações técnicas
 Repositório público de Phonemizers feitos por Xiao Pingguo.
 
-[![Compile OpenUtau Phonemizers](https://github.com/dorayakito/Phonemizers-por-Xiao/actions/workflows/compile-phonemizers.yml/badge.svg)](https://github.com/dorayakito/Phonemizers-por-Xiao/actions/workflows/compile-phonemizers.yml)
-
 # Phonemizers para OpenUtau (PT-BR)
 
 Olá! Este repositório foi criado para ajudar a comunidade de UTAU brasileira a ter mais opções de phonemizers no OpenUtau. Aqui você encontrará uma coleção de plugins focados no nosso idioma, cobrindo desde sistemas tradicionais até os mais modernos.
