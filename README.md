@@ -65,44 +65,9 @@ Além disso, este pacote inclui documentação técnica:
    dotnet run --project OpenUtau
    ```
 
-Alternativamente, os phonemizers podem ser carregados automaticamente se colocados na pasta `Plugins` de uma instalação do OpenUtau que suporte carregamento de scripts C#.
-
-## Uso
-
-1. No OpenUtau, selecione a trilha do cantor desejado.
-2. Nas configurações da trilha (Track Settings), localize a opção "Phonemizer".
-3. Selecione o phonemizer correspondente ao sistema de gravação e fonética do seu voicebank (ex: `PT-BR CVVC BRAPA`).
-4. Insira as letras nas notas. Os phonemizers converterão automaticamente os textos para os aliases correspondentes no voicebank.
-
-## Sistemas Fonéticos Suportados
-
-### BRAPA
-
-Baseado na tabela oficial do Team-BRAPA. Utiliza fonemas como `a, ax, eh, oh, an, en, in, on, un` para vogais e `sh, ch, dji, chi` para consoantes específicas.
-
-### IPEA
-
-Utiliza a notação IPÊ-A com suporte a vogais como `@, 7, 1, 0, Q`. Inclui lógica de G2P para facilitar a inserção de letras convencionais.
-
-### X-SAMPA
-
-Segue a convenção X-SAMPA para PT-BR, utilizando símbolos como `E, O, a~, e~, i~, o~, u~, S, Z, J, L`.
-
-### F-SAMPA
-
-Notação simplificada para rapidez na escrita e compatibilidade com voicebanks do sistema Brigadeiro.
-
-### NUBLADO
-
-Sistema caracterizado por aliases em parênteses `( )`. Utiliza fonemas como `a], e], i], o], u]` para nasais, `3` para "é" e `0` para "ó". Inclui suporte a finalizações especiais como `aR` e `awn`.
-
-### CATIPA
-
-Baseado no sistema do voicebank Junei Aiden. Utiliza apóstrofos para vogais reduzidas (`a'`, `e'`) e til para nasais (`a~`, `e~`). Inclui consoantes como `dj`, `tch`, `rr` e `wr`.
-
 ## Requisitos
 
-- OpenUtau v0.5 ou superior.
+- OpenUtau.
 - Código-fonte do OpenUtau para compilação dos plugins.
 - Pacotes da Microsoft (SDK do .NET, etc.) devidamente instalados para o processo de compilação.
 - Voicebank configurado com oto.ini compatível com os respectivos sistemas.
