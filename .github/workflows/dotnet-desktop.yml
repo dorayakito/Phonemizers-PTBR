@@ -1,9 +1,0 @@
-# Este arquivo substitui o template padrão do GitHub que não é compatível com este projeto.
-# O workflow de compilação real está em compile-phonemizers.yml
-name: "(desativado)"
-on: workflow_dispatch
-jobs:
-  noop:
-    runs-on: ubuntu-latest
-    steps:
-      - run: echo "Este workflow foi desativado."
