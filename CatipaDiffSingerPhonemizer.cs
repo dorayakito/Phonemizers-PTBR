@@ -5,7 +5,7 @@ using OpenUtau.Api;
 using OpenUtau.Core.Ustx;
 
 namespace OpenUtau.Plugins {
-    [Phonemizer("Portuguese CATIPA DiffSinger Phonemizer", "DIFF CATIPA", "xiao")]
+    [Phonemizer("Portuguese CATIPA DiffSinger Phonemizer", "DIFF CATIPA", "xiao", "PT")]
     public class CatipaDiffSingerPhonemizer : Phonemizer {
         protected USinger singer;
 
