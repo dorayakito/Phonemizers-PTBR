@@ -1,124 +1,63 @@
-using System;
-using System.Collections.Generic;
 using System.Linq;
+using System.Collections.Generic;
 using OpenUtau.Api;
-using OpenUtau.Core.Ustx;
+using OpenUtau.Core.G2p;
+using OpenUtau.Plugin.Builtin;
 
-namespace OpenUtau.Plugins {
-    [Phonemizer("Portuguese IPEA Phonemizer", "PT-BR IPEA", "ly ft. xiao")]
-    public class IPEAPhonemizer : Phonemizer {
-        protected USinger singer;
-
-        public override void SetSinger(USinger singer) => this.singer = singer;
-
-        private readonly string[] vowels = {
-            "Ao", "am", "em", "im", "om", "um",
-            "6im", "eim", "oim", "uim",
-            "Ei", "Oi", "ai", "ei", "oi", "ui",
-            "Eu", "Ou", "au", "eu", "iu", "ou",
-            "E", "O", "6",
-            "a", "e", "i", "o", "u"
+namespace IpeaPhonemizer {
+    [Phonemizer("IPÊ-A CVVC Phonemizer", "IPÊ-A CVVC", "ly ft. xiao", "PT")]
+    public class IpeaCVVCPhonemizer : SyllableBasedPhonemizer {
+        private readonly string[] vowels = { "a", "e", "i", "o", "u", "E", "O", "6", "am", "em", "im", "om", "um", "Ao" };
+        private readonly string[] consonants = { "b", "d", "f", "g", "k", "l", "m", "n", "p", "r", "s", "t", "v", "z", "X", "Z", "L", "J", "R", "tS", "dZ", "w", "j", "w~", "j~" };
+        private readonly Dictionary<string, string> dictionaryReplacements = new Dictionary<string, string> {
+            { "a~", "am" }, { "e~", "em" }, { "i~", "im" }, { "o~", "om" }, { "u~", "um" }, { "w~", "Ao" }, { "j~", "im" },
+            { "X", "ch" }, { "Z", "j" }, { "L", "lh" }, { "J", "nh" }, { "R", "rr" }, { "tS", "tch" }, { "dZ", "dj" },
         };
 
-        private readonly string[] consonants = {
-            "tch", "rr", "rw", "lh", "nh", "dj", "qu",
-            "ch", "b", "d", "f", "g", "j", "k", "l",
-            "m", "n", "p", "r", "s", "t", "v", "w",
-            "x", "y", "z"
-        };
+        protected override string GetDictionaryName() => "pt";
+        protected override IG2p LoadBaseDictionary() => new PortugueseG2p();
+        protected override string[] GetVowels() => vowels;
+        protected override string[] GetConsonants() => consonants;
+        protected override Dictionary<string, string> GetDictionaryPhonemesReplacement() => dictionaryReplacements;
 
-        private static readonly Dictionary<string, string> g2p = new Dictionary<string, string>();
+        protected override List<string> ProcessSyllable(Syllable syllable) {
+            var phonemes = new List<string>();
+            var (prevV, cc, v) = (syllable.prevV, syllable.cc, syllable.v);
+            string phoneme = string.Empty;
 
-        static IPEAPhonemizer() {
-            var vBase = new Dictionary<string, string> {
-                { "a", "a" }, { "á", "a" }, { "à", "a" }, { "â", "6" }, { "ã", "am" },
-                { "e", "e" }, { "é", "E" }, { "ê", "e" },
-                { "i", "i" }, { "í", "i" },
-                { "o", "o" }, { "ó", "O" }, { "ô", "o" }, { "õ", "om" },
-                { "u", "u" }, { "ú", "u" },
-                { "ai", "ai" }, { "ei", "ei" }, { "oi", "oi" }, { "ui", "ui" },
-                { "éi", "Ei" }, { "ói", "Oi" },
-                { "au", "au" }, { "eu", "eu" }, { "iu", "iu" }, { "ou", "ou" },
-                { "éu", "Eu" }, { "ól", "Ou" },
-                { "ão", "Ao" }, { "6im", "6im" }, { "eim", "eim" }, { "oim", "oim" }, { "uim", "uim" }
-            };
-
-            foreach (var v in vBase) g2p[v.Key] = v.Value;
-
-            string[] cBase = { "b", "d", "f", "j", "k", "l", "m", "n", "p", "r", "s", "t", "v", "w", "z", "ch", "nh", "lh", "rr", "rw", "qu", "dj", "tch", "x", "y" };
-
-            foreach (var c in cBase) {
-                string cTarget = c;
-                if (c == "x") cTarget = "ch";
-                foreach (var v in vBase) {
-                    g2p[c + v.Key] = cTarget + " " + v.Value;
+            if (syllable.IsStartingV) phoneme = $"- {v}";
+            else if (syllable.IsVV) {
+                if (CanMakeAliasExtension(syllable)) phoneme = null;
+                else {
+                    phoneme = $"{prevV} {v}";
+                    if (!HasOto(phoneme, syllable.vowelTone)) phoneme = $"{prevV}{v}";
+                    if (!HasOto(phoneme, syllable.vowelTone)) {
+                        string alt = prevV == "i" ? "y" : (prevV == "o" || prevV == "u" ? "w" : string.Empty);
+                        phoneme = $"{alt} {v}";
+                    }
+                    if (!HasOto(phoneme, syllable.vowelTone)) phoneme = v;
                 }
+            } else if (syllable.IsVCV) {
+                var vcv = new[] { $"{prevV} {cc[0]}", $"{prevV} {cc[0].ToLower()}", $"{prevV}{cc[0]}" }.FirstOrDefault(a => HasOto(a, syllable.vowelTone));
+                if (vcv != null) phonemes.Add(vcv);
             }
 
-            foreach (var v in vBase) {
-                g2p["c" + v.Key] = (new[] { "e", "é", "ê", "i", "í" }.Contains(v.Key) ? "s" : "k") + " " + v.Value;
-                g2p["g" + v.Key] = (new[] { "e", "é", "ê", "i", "í" }.Contains(v.Key) ? "j" : "g") + " " + v.Value;
-                g2p["ç" + v.Key] = "s " + v.Value;
-                g2p["h" + v.Key] = v.Value;
+            if (syllable.IsStartingCV || syllable.IsVCV) {
+                for (int i = 0; i < cc.Length - 1; i++) {
+                    var vc = $"{cc[i]} {cc[i + 1]}";
+                    if (HasOto(vc, syllable.vowelTone)) phonemes.Add(vc);
+                }
+                phoneme = $"{cc.Last()} {v}";
             }
+            phonemes.Add(phoneme);
+            return phonemes;
         }
 
-        public override Result Process(Note[] notes, Note? prev, Note? next, Note? prevNeighbour, Note? nextNeighbour, Note[] prevNeighbours) {
-            var lyric = notes[0].lyric.ToLower();
-            if (notes[0].lyric == "+" && prevNeighbour != null) {
-                lyric = prevNeighbour.Value.lyric.ToLower();
-            }
-
-            string phoneme = g2p.ContainsKey(lyric) ? g2p[lyric] : lyric;
-            string c = string.Empty;
-            string v = phoneme;
-
-            foreach (var con in consonants.OrderByDescending(x => x.Length)) {
-                var prefix = con + " ";
-                if (phoneme.StartsWith(prefix)) {
-                    c = con;
-                    v = phoneme.Substring(prefix.Length);
-                    break;
-                }
-            }
-
-            var phonemes = new List<Phoneme>();
-            int tone = notes[0].tone;
-
-            if (prevNeighbour == null) {
-                var startAlias = $"- {(string.IsNullOrEmpty(c) ? v : c + " " + v)}";
-                if (!singer.TryGetMappedOto(startAlias, tone, out _)) {
-                    startAlias = string.IsNullOrEmpty(c) ? v : $"{c} {v}";
-                }
-                phonemes.Add(new Phoneme { phoneme = startAlias });
-            } else {
-                var prevLyric = prevNeighbour.Value.lyric.ToLower();
-                var prevPhoneme = g2p.ContainsKey(prevLyric) ? g2p[prevLyric] : prevLyric;
-
-                string prevV = string.Empty;
-                foreach (var vv in vowels.OrderByDescending(x => x.Length)) {
-                    if (prevPhoneme.EndsWith(vv)) {
-                        prevV = vv;
-                        break;
-                    }
-                }
-
-                if (!string.IsNullOrEmpty(c)) {
-                    var vcAlias = $"{prevV} {c}";
-                    if (singer.TryGetMappedOto(vcAlias, tone, out var oto)) {
-                        phonemes.Add(new Phoneme { phoneme = vcAlias, position = -MsToTick(oto.Preutter) });
-                    }
-                }
-
-                var cvAlias = string.IsNullOrEmpty(c) ? v : $"{c} {v}";
-                if (singer.TryGetMappedOto(cvAlias, tone, out _)) {
-                    phonemes.Add(new Phoneme { phoneme = cvAlias });
-                } else {
-                    phonemes.Add(new Phoneme { phoneme = v });
-                }
-            }
-
-            return new Result { phonemes = phonemes.ToArray() };
+        protected override List<string> ProcessEnding(Ending ending) {
+            var (prevV, cc) = (ending.prevV, ending.cc);
+            string phoneme = ending.IsEndingV ? $"{prevV} -" : $"{prevV} {cc[0]}";
+            if (!ending.IsEndingV && !HasOto(phoneme, ending.tone)) phoneme = $"{prevV}{cc[0]}";
+            return new List<string> { phoneme };
         }
     }
 }
